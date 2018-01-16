@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>lifegame</title>
+    <style>
+        table.is-moving td{
+            transition-property: all;
+            transition-duration: 500ms;
+        }
+        td{
+            height: 10px;
+            width: 10px;
+            border: black solid 1px;
+        }
+        td.living-cell{
+            background-color: black;
+        }
+        table{
+            border-collapse: collapse;
+            border-spacing: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+</body>
+
+<script src="main.js">
+</script>
+<script>
+    const node = document.getElementById("app");
+    Elm.Main.embed(node);
+</script>
+</html>

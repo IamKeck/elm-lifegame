@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Array exposing (Array, toList, repeat, get, set, filter, length, indexedMap)
+import Maybe exposing (andThen)
 import List
 import Debug
 import Time
@@ -77,37 +78,38 @@ update msg model =
             )
 
 
+invertStatus : Status -> Status
+invertStatus s =
+    case s of
+        Alive ->
+            Dead
+
+        Dead ->
+            Alive
+
+
 clickCell : Int -> Int -> World -> World
 clickCell x y model =
     let
         row =
             get x model
+
+        state =
+            row |> andThen (get y)
     in
-        case row of
-            Nothing ->
+        case ( row, state ) of
+            ( Nothing, _ ) ->
                 model
 
-            Just r ->
+            ( _, Nothing ) ->
+                model
+
+            ( Just old_row, Just old_state ) ->
                 let
-                    cell =
-                        get y r
+                    new_row =
+                        set y (invertStatus old_state) old_row
                 in
-                    case cell of
-                        Nothing ->
-                            model
-
-                        Just s ->
-                            let
-                                new_state =
-                                    if s == Alive then
-                                        Dead
-                                    else
-                                        Alive
-
-                                new_row =
-                                    set y new_state r
-                            in
-                                set x new_row model
+                    set x new_row model
 
 
 getCellState : Int -> Int -> World -> Maybe Status

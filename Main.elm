@@ -63,7 +63,19 @@ update msg model =
             ( { model | world = clickCell x y model.world }, Cmd.none )
 
         Next ->
-            ( { model | world = nextWorld model.world }, Cmd.none )
+            let
+                new_world =
+                    nextWorld model.world
+
+                is_changed =
+                    new_world == model.world
+            in
+                case is_changed of
+                    True ->
+                        ( { model | auto = False }, Cmd.none )
+
+                    False ->
+                        ( { model | world = new_world }, Cmd.none )
 
         AutoClicked ->
             ( { model

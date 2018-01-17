@@ -39,12 +39,12 @@ type alias World =
 
 
 type alias Model =
-    { world : World, auto : Bool }
+    { world : World, auto : Bool, random_mode : Bool }
 
 
 initial_model : ( Model, Cmd Msg )
 initial_model =
-    ( { world = repeat size Dead |> repeat size, auto = False }, Cmd.none )
+    ( { world = repeat size Dead |> repeat size, auto = False, random_mode = False }, Cmd.none )
 
 
 type Msg
@@ -52,6 +52,7 @@ type Msg
     | Next
     | AutoClicked
     | RandomClicked
+    | GenerateRandom
     | RandomGenerated ( Int, Int )
 
 
@@ -88,11 +89,15 @@ update msg model =
                         model.world
                     else
                         nextWorld model.world
+                , random_mode = False
               }
             , Cmd.none
             )
 
         RandomClicked ->
+            ( { model | random_mode = not model.random_mode }, Cmd.none )
+
+        GenerateRandom ->
             ( model, Random.generate RandomGenerated randomPointGenerator )
 
         RandomGenerated ( x, y ) ->
@@ -220,6 +225,8 @@ subscriptions : Model -> Sub Msg
 subscriptions m =
     if m.auto == True then
         Time.every Time.second (\_ -> Next)
+    else if m.random_mode == True then
+        Time.every (80 * Time.millisecond) (\_ -> GenerateRandom)
     else
         Sub.none
 
@@ -262,6 +269,13 @@ view m =
             if m.auto then
                 []
             else
-                [ button [ onClick RandomClicked ] [ text "ランダム配置" ] ]
+                let
+                    random_text =
+                        if m.random_mode then
+                            "ランダム配置停止"
+                        else
+                            "ランダム配置開始"
+                in
+                    [ button [ onClick RandomClicked ] [ text random_text ] ]
     in
         div [] <| [ world, next_button, auto_button ] ++ random_button

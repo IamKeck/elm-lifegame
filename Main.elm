@@ -8,6 +8,7 @@ import Maybe exposing (andThen)
 import List
 import Debug
 import Time
+import Random
 
 
 main : Program Never Model Msg
@@ -50,6 +51,8 @@ type Msg
     = CellClicked Int Int
     | Next
     | AutoClicked
+    | RandomClicked
+    | RandomGenerated ( Int, Int )
 
 
 
@@ -88,6 +91,29 @@ update msg model =
               }
             , Cmd.none
             )
+
+        RandomClicked ->
+            ( model, Random.generate RandomGenerated randomPointGenerator )
+
+        RandomGenerated ( x, y ) ->
+            case getCellState x y model.world of
+                Nothing ->
+                    ( model, Random.generate RandomGenerated randomPointGenerator )
+
+                Just Alive ->
+                    ( model, Random.generate RandomGenerated randomPointGenerator )
+
+                Just Dead ->
+                    ( { model | world = clickCell x y model.world }, Cmd.none )
+
+
+randomPointGenerator : Random.Generator ( Int, Int )
+randomPointGenerator =
+    let
+        g =
+            Random.int 0 (size - 1)
+    in
+        Random.map2 (,) g g
 
 
 invertStatus : Status -> Status
@@ -231,5 +257,11 @@ view m =
 
         auto_button =
             button [ onClick AutoClicked ] [ text auto_text ]
+
+        random_button =
+            if m.auto then
+                []
+            else
+                [ button [ onClick RandomClicked ] [ text "ランダム配置" ] ]
     in
-        div [] [ world, next_button, auto_button ]
+        div [] <| [ world, next_button, auto_button ] ++ random_button

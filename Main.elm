@@ -54,6 +54,7 @@ type Msg
     | RandomClicked
     | GenerateRandom
     | RandomGenerated ( Int, Int )
+    | Reset
 
 
 
@@ -110,6 +111,9 @@ update msg model =
 
                 Just Dead ->
                     ( { model | world = clickCell x y model.world }, Cmd.none )
+
+        Reset ->
+            initial_model
 
 
 randomPointGenerator : Random.Generator ( Int, Int )
@@ -253,6 +257,9 @@ view m =
                 |> List.indexedMap rowToHtml
                 |> table [ classList [ ( "is-moving", m.auto ) ] ]
 
+        reset_button =
+            button [ onClick Reset ] [ text "リセット" ]
+
         next_button =
             button [ onClick Next ] [ text "次世代" ]
 
@@ -278,4 +285,4 @@ view m =
                 in
                     [ button [ onClick RandomClicked ] [ text random_text ] ]
     in
-        div [] <| [ world, next_button, auto_button ] ++ random_button
+        div [] <| [ world, reset_button, next_button, auto_button ] ++ random_button
